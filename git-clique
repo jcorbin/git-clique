@@ -463,6 +463,12 @@ class PushCommand(Command):
     def __call__(self):
         if self.args.refspec:
             refspec = self.args.refspec
+            if ':' in refspec:
+                head, remote_head = refspec.split(':')
+            else:
+                head = remote_head = refspec
+            remote_head = 'refs/remotes/%s/%s' % (self.args.remote, remote_head)
+
         else:
             p = self.repo.runcmd(
                 ('git', 'symbolic-ref', 'HEAD'),
@@ -486,6 +492,16 @@ class PushCommand(Command):
         retcode = prun_repo_cmds(
             (self.repo, cmd(url), {})
             for url in self.repo.relativize_repos(repos))
+
+        if retcode == 0:
+            p = self.repo.runcmd(
+                ('git', 'rev-parse', head, remote_head),
+                stdout=PIPE)
+            head_rev, remote_rev = (line.strip() for line in p.stdout)
+            if head_rev != remote_rev:
+                p = self.repo.runcmd(
+                    ('git', 'update-ref',
+                     '-m', 'update by git-clique push', remote_head, head_rev))
 
         return retcode
 
