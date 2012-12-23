@@ -285,9 +285,17 @@ class repo(namedtuple('repo', 'host path')):
                 self.parse(line.rstrip('\r\n'))
                 for line in urls.stdout)
             cb(repos)
-        self.runcmd((
-            'git', 'config',  '--get-all', 'remote.' + remote + '.url'
-        ), stdout=PIPE, wait=False, onexit=cmd_done)
+        self.config('--get-all', 'remote.' + remote + '.url',
+                    wait=False, onexit=cmd_done)
+
+    def config(self, *args, **kwargs):
+        kwargs.setdefault('stdout', PIPE)
+        cmd = ('git', 'config') + args
+        p = self.runcmd(cmd, **kwargs)
+        if kwargs['stdout'] == PIPE and kwargs.get('wait', True):
+            return p.stdout.read().strip()
+        else:
+            return p
 
     def __str__(self):
         if self.host is None:
