@@ -194,6 +194,7 @@ class repo(namedtuple('repo', 'host path')):
         else:
             rs = added
 
+        c2 = None
         if len(rs) == 1:
             c2 = ['git', 'remote', 'set-url', remote, '--add',
                   self.relativize_repo(rs[0])]
@@ -202,11 +203,14 @@ class repo(namedtuple('repo', 'host path')):
                   'git', 'remote', 'set-url', remote, '--add']
 
         kwargs = {}
-        if c1:
+        if c1 and c2:
             cmd = c1 + ['&&'] + c2
             kwargs['shell'] = True
+        elif c1: cmd = c1
+        elif c2: cmd = c2
         else:
-            cmd = c2
+            cb(added)
+            return
         if len(rs) > 1:
             kwargs['stdin'] = PIPE
         def cmd_done(p):
