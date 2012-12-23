@@ -346,8 +346,7 @@ class AddRmCommand(Command):
         changed_repos = self.change(repos)
 
         outstanding = set()
-        def done(r, _):
-            outstanding.remove(r)
+        done = lambda r, _: outstanding.remove(r)
 
         for r in changed_repos:
             outstanding.add(r)
