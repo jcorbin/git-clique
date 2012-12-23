@@ -371,6 +371,7 @@ class AddRmCommand(Command):
 class AddCommand(AddRmCommand):
     def change(self, repos):
         added = self.repo.add_repos(self.remote, *repos)
+        self.repos.update(added)
         return added
 
     def change_changee(self, r, cb):
