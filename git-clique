@@ -311,9 +311,13 @@ class Command(object):
         name = name.lower()
         subparser = subparsers.add_parser(name)
         subparser.set_defaults(cmd=cls)
+        cls.add_arguments(subparser)
+        return subparser
+
+    @classmethod
+    def add_arguments(cls, subparser):
         subparser.add_argument('remote', metavar='<name>',
             help='name of the clique remote')
-        return subparser
 
     def __init__(self, args):
         self.args = args
@@ -339,11 +343,10 @@ class Command(object):
 
 class AddRmCommand(Command):
     @classmethod
-    def add_subparser(cls, subparsers):
-        subparser = super(AddRmCommand, cls).add_subparser(subparsers)
+    def add_arguments(cls, subparser):
+        super(AddRmCommand, cls).add_arguments(subparser)
         subparser.add_argument('urls', metavar='<url>', nargs='+',
             help='url(s) to add/remove')
-        return subparser
 
     def __init__(self, args):
         super(AddRmCommand, self).__init__(args)
@@ -433,11 +436,10 @@ class SyncCommand(Command):
 
 class RunCommand(Command):
     @classmethod
-    def add_subparser(cls, subparsers):
-        subparser = super(RunCommand, cls).add_subparser(subparsers)
+    def add_arguments(cls, subparser):
+        super(RunCommand, cls).add_arguments(subparser)
         subparser.add_argument('command', nargs=argparse.REMAINDER,
             help='the command to run')
-        return subparser
 
     def __init__(self, args):
         super(RunCommand, self).__init__(args)
@@ -454,11 +456,10 @@ class PushCommand(Command):
     # TODO: support topologies other than star (binary tree would be nice)
 
     @classmethod
-    def add_subparser(cls, subparsers):
-        subparser = super(PushCommand, cls).add_subparser(subparsers)
+    def add_arguments(cls, subparser):
+        super(PushCommand, cls).add_arguments(subparser)
         subparser.add_argument('refspec', metavar='<refspec>', nargs='?',
             help='which refs to push')
-        return subparser
 
     def __call__(self):
         if self.args.refspec:
