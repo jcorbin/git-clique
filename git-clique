@@ -344,23 +344,23 @@ class AddRmCommand(Command):
 
     def __call__(self):
         repos = tuple(repo.parse(url) for url in self.args.urls)
-        def sync_changes(changed_repos):
-            self.changed.update(changed_repos)
+        changed_repos = self.change(repos)
 
-            outstanding = set()
-            def done(r, _):
-                outstanding.remove(r)
+        self.changed.update(changed_repos)
 
-            for r in self.changed:
-                outstanding.add(r)
-                self.change_changee(r, partial(done, r))
-            while outstanding: signal.pause()
+        outstanding = set()
+        def done(r, _):
+            outstanding.remove(r)
 
-            for r in self.repos - self.changed:
-                outstanding.add(r)
-                self.propagate(r, repos, partial(done, r))
-            while outstanding: signal.pause()
-        self.change(repos, sync_changes)
+        for r in self.changed:
+            outstanding.add(r)
+            self.change_changee(r, partial(done, r))
+        while outstanding: signal.pause()
+
+        for r in self.repos - self.changed:
+            outstanding.add(r)
+            self.propagate(r, repos, partial(done, r))
+        while outstanding: signal.pause()
 
     def change(self, repos, cb):
         raise NotImplementedError
@@ -372,8 +372,8 @@ class AddRmCommand(Command):
         raise NotImplementedError
 
 class AddCommand(AddRmCommand):
-    def change(self, repos, cb):
-        return self.repo.async_add_repos(self.remote, repos, cb)
+    def change(self, repos):
+        return self.repo.add_repos(self.remote, *repos)
 
     def change_changee(self, r, cb):
         repos = self.repos
@@ -384,8 +384,8 @@ class AddCommand(AddRmCommand):
         r.async_add_repos(self.remote, repos, cb)
 
 class RmCommand(AddRmCommand):
-    def change(self, repos, cb):
-        return self.repo.async_remove_repos(self.remote, repos, cb)
+    def change(self, repos):
+        return self.repo.remove_repos(self.remote, *repos)
 
     def change_changee(self, r, cb):
         r.async_remove_remote(self.remote, cb)
