@@ -220,7 +220,7 @@ class repo(namedtuple('repo', 'host path')):
     def remove_repos(self, remote, *repos):
         ret = [] # TODO: nonlocal in py3k
         self.async_remove_repos(remote, repos, ret.append)
-        while not ret: signal.pause
+        while not ret: signal.pause()
         return ret[0]
 
     def async_remove_repos(self, remote, repos, cb):
