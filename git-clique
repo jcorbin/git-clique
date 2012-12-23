@@ -462,9 +462,23 @@ class PushCommand(Command):
 
     def __call__(self):
         if self.args.refspec:
-            cmd = lambda u: ('git', 'push', u, self.args.refspec)
+            refspec = self.args.refspec
         else:
-            cmd = lambda u: ('git', 'push', u)
+            p = self.repo.runcmd(
+                ('git', 'symbolic-ref', 'HEAD'),
+                stdout=PIPE)
+            head = p.stdout.read().strip()
+            branch = head.rsplit('/', 1)[1]
+
+            remote_head = self.repo.config('branch.%s.merge' % branch)
+            remote_head = remote_head.replace('/heads/', '/remotes/%s/' % self.remote)
+
+            remote_branch = remote_head.rsplit('/', 1)[1]
+            refspec = branch if branch == remote_branch else \
+                      '%s:%s' % (branch, remote_branch)
+
+        cmd = lambda u: ('git', 'push', u, refspec)
+
         repos = self.repo.remote_repos(self.remote)
         retcode = prun_repo_cmds(
             (self.repo, cmd(url), {})
