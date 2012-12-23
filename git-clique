@@ -114,8 +114,8 @@ def prun_repo_cmds(repo_cmd_kwargs):
         print repo, '$', list2cmdline(cmd)
         sys.stdout.flush()
         ts = [
-            shunt_pipe_thread('  out>', p.stdout),
-            shunt_pipe_thread('  err>', p.stderr)]
+            shunt_pipe_thread('  ', p.stdout),
+            shunt_pipe_thread('  ', p.stderr)]
         retcode = p.wait()
         for t in ts:
             t.join()
