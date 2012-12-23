@@ -466,9 +466,11 @@ class PushCommand(Command):
         else:
             cmd = lambda u: ('git', 'push', u)
         repos = self.repo.remote_repos(self.remote)
-        prun_repo_cmds(
+        retcode = prun_repo_cmds(
             (self.repo, cmd(url), {})
             for url in self.repo.relativize_repos(repos))
+
+        return retcode
 
 import argparse
 parser = argparse.ArgumentParser()
