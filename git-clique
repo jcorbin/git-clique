@@ -385,6 +385,7 @@ class AddCommand(AddRmCommand):
 class RmCommand(AddRmCommand):
     def change(self, repos):
         removed = self.repo.remove_repos(self.remote, *repos)
+        self.repos.difference_update(removed)
         return removed
 
     def change_changee(self, r, cb):
