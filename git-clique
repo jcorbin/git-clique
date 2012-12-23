@@ -357,7 +357,7 @@ class AddRmCommand(Command):
             self.change_changee(r, partial(done, r))
         while outstanding: signal.pause()
 
-        for r in self.repos - self.changed:
+        for r in self.repos.difference(self.changed):
             outstanding.add(r)
             self.propagate(r, repos, partial(done, r))
         while outstanding: signal.pause()
