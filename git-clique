@@ -339,25 +339,22 @@ class AddRmCommand(Command):
 
     def __init__(self, args):
         super(AddRmCommand, self).__init__(args)
-        self.changed = set()
         self.repos = set(self.repo.remote_repos(self.remote))
 
     def __call__(self):
         repos = tuple(repo.parse(url) for url in self.args.urls)
         changed_repos = self.change(repos)
 
-        self.changed.update(changed_repos)
-
         outstanding = set()
         def done(r, _):
             outstanding.remove(r)
 
-        for r in self.changed:
+        for r in changed_repos:
             outstanding.add(r)
             self.change_changee(r, partial(done, r))
         while outstanding: signal.pause()
 
-        for r in self.repos.difference(self.changed):
+        for r in self.repos.difference(changed_repos):
             outstanding.add(r)
             self.propagate(r, repos, partial(done, r))
         while outstanding: signal.pause()
