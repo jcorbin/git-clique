@@ -462,6 +462,15 @@ class PushCommand(Command):
             help='which refs to push')
 
     def __call__(self):
+        p = self.repo.runcmd(
+            ('git', 'symbolic-ref', 'HEAD'),
+            stdout=PIPE)
+        head = p.stdout.read().strip()
+        branch = head.rsplit('/', 1)[1]
+
+        if self.repo.config('branch.%s.remote' % branch) != self.remote:
+            raise RuntimeError('tracking branch mismatch, specify ref')
+
         if self.args.refspec:
             refspec = self.args.refspec
             if ':' in refspec:
@@ -471,15 +480,6 @@ class PushCommand(Command):
             remote_head = 'refs/remotes/%s/%s' % (self.args.remote, remote_head)
 
         else:
-            p = self.repo.runcmd(
-                ('git', 'symbolic-ref', 'HEAD'),
-                stdout=PIPE)
-            head = p.stdout.read().strip()
-            branch = head.rsplit('/', 1)[1]
-
-            if self.repo.config('branch.%s.remote' % branch) != self.remote:
-                raise RuntimeError('tracking branch mismatch, specify ref')
-
             remote_head = self.repo.config('branch.%s.merge' % branch)
             remote_head = remote_head.replace('/heads/', '/remotes/%s/' % self.remote)
 
