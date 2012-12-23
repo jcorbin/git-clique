@@ -236,7 +236,6 @@ class repo(namedtuple('repo', 'host path')):
         current_repos = tuple(r for r in current_repos if r not in removed)
 
         def cmd_done(_):
-            print _.cmdstr, 'done'
             sys.stdout.flush()
             self._remote_repos_cache[remote] = current_repos
             cb(removed)
