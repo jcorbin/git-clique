@@ -385,10 +385,7 @@ class AddCommand(AddRmCommand):
 
 class RmCommand(AddRmCommand):
     def change(self, repos, cb):
-        if self.args.notthis:
-            cb(repos)
-        else:
-            self.repo.async_remove_repos(self.remote, repos, cb)
+        return self.repo.async_remove_repos(self.remote, repos, cb)
 
     def change_changee(self, r, cb):
         r.async_remove_remote(self.remote, cb)
