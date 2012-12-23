@@ -470,6 +470,9 @@ class PushCommand(Command):
             head = p.stdout.read().strip()
             branch = head.rsplit('/', 1)[1]
 
+            if self.repo.config('branch.%s.remote' % branch) != self.remote:
+                raise RuntimeError('tracking branch mismatch, specify ref')
+
             remote_head = self.repo.config('branch.%s.merge' % branch)
             remote_head = remote_head.replace('/heads/', '/remotes/%s/' % self.remote)
 
