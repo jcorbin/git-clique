@@ -232,7 +232,8 @@ class repo(namedtuple('repo', 'host path')):
         # TODO: worth it to use a set?
         removed = tuple(r for r in repos if r in current_repos)
         if not removed:
-            return removed
+            cb(removed)
+            return
         current_repos = tuple(r for r in current_repos if r not in removed)
 
         def cmd_done(_):
