@@ -457,7 +457,8 @@ class PushCommand(Command):
 
     @classmethod
     def add_arguments(cls, subparser):
-        super(PushCommand, cls).add_arguments(subparser)
+        subparser.add_argument('remote', metavar='<name>', nargs='?',
+            help='name of the clique remote')
         subparser.add_argument('refspec', metavar='<refspec>', nargs='?',
             help='which refs to push')
 
@@ -468,7 +469,10 @@ class PushCommand(Command):
         head = p.stdout.read().strip()
         branch = head.rsplit('/', 1)[1]
 
-        if self.repo.config('branch.%s.remote' % branch) != self.remote:
+        remote = self.repo.config('branch.%s.remote' % branch)
+        if self.remote is None:
+            self.remote = remote
+        elif remote != self.remote:
             raise RuntimeError('tracking branch mismatch, specify ref')
 
         if self.args.refspec:
