@@ -461,6 +461,8 @@ class PushCommand(Command):
             help='name of the clique remote')
         subparser.add_argument('refspec', metavar='<refspec>', nargs='?',
             help='which refs to push')
+        subparser.add_argument('options', nargs=argparse.REMAINDER,
+            help='push options')
 
     def __call__(self):
         p = self.repo.runcmd(
@@ -491,7 +493,11 @@ class PushCommand(Command):
             refspec = branch if branch == remote_branch else \
                       '%s:%s' % (branch, remote_branch)
 
-        cmd = lambda u: ('git', 'push', u, refspec)
+        def cmd(u):
+            cmd = ['git', 'push']
+            cmd.extend(self.args.options)
+            cmd += [u, refspec]
+            return cmd
 
         repos = self.repo.remote_repos(self.remote)
         retcode = prun_repo_cmds(
