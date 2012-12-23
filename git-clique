@@ -370,7 +370,8 @@ class AddRmCommand(Command):
 
 class AddCommand(AddRmCommand):
     def change(self, repos):
-        return self.repo.add_repos(self.remote, *repos)
+        added = self.repo.add_repos(self.remote, *repos)
+        return added
 
     def change_changee(self, r, cb):
         repos = self.repos
@@ -382,7 +383,8 @@ class AddCommand(AddRmCommand):
 
 class RmCommand(AddRmCommand):
     def change(self, repos):
-        return self.repo.remove_repos(self.remote, *repos)
+        removed = self.repo.remove_repos(self.remote, *repos)
+        return removed
 
     def change_changee(self, r, cb):
         r.async_remove_remote(self.remote, cb)
