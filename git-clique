@@ -285,15 +285,15 @@ class repo(namedtuple('repo', 'host path')):
                 self.parse(line.rstrip('\r\n'))
                 for line in urls.stdout)
             cb(repos)
-        self.config('--get-all', 'remote.' + remote + '.url',
-                    wait=False, onexit=cmd_done)
+        self.config('--get-all', 'remote.' + remote + '.url', onexit=cmd_done)
 
     def config(self, *args, **kwargs):
         kwargs.setdefault('stdout', PIPE)
         cmd = ('git', 'config') + args
-        p = self.runcmd(cmd, **kwargs)
+        p = self.runcmd(cmd, wait=False, **kwargs)
+        retcode = p.wait()
         if kwargs['stdout'] == PIPE and kwargs.get('wait', True):
-            return p.stdout.read().strip()
+            return p.stdout.read().strip() if retcode == 0 else None
         else:
             return p
 
