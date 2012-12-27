@@ -479,10 +479,13 @@ class PushCommand(Command):
         branch = head.rsplit('/', 1)[1]
 
         remote = self.repo.config('branch.%s.remote' % branch)
-        if self.remote is None:
-            self.remote = remote
-        elif remote != self.remote:
-            raise RuntimeError('tracking branch mismatch, specify ref')
+        if remote is not None:
+            if self.remote is None:
+                self.remote = remote
+            elif remote != self.remote:
+                raise RuntimeError('tracking branch mismatch, specify ref')
+        elif self.remote is None:
+            raise RuntimeError('no remote specified and no default configured')
 
         if self.args.refspec:
             refspec = self.args.refspec
@@ -494,6 +497,9 @@ class PushCommand(Command):
 
         else:
             remote_head = self.repo.config('branch.%s.merge' % branch)
+            if remote_head is None:
+                raise RuntimeError('no refspec given and no default configured')
+
             remote_head = remote_head.replace('/heads/', '/remotes/%s/' % self.remote)
 
             remote_branch = remote_head.rsplit('/', 1)[1]
